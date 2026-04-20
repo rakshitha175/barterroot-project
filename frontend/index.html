@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BarterRoot</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#2D6A2D; --green-dark:#1a4a1a; --green-light:#E8F4E8;
+  --terra:#C4622D; --terra-light:#FDE8E0;
+  --amber:#E65100; --amber-light:#FFF3E0;
+  --bg:#F0F4F0; --white:#fff; --card:#fff;
+  --border:#dde8dd; --text:#1a2e1a; --muted:#666;
+  --shadow:0 2px 12px rgba(0,0,0,0.07);
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── PAGE SYSTEM ── */
+.page{display:none;min-height:100vh;}
+.page.active{display:block;}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--green);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40;}
+.topbar-logo{font-size:1.2rem;font-weight:800;}
+.topbar-logo span{color:#A8D5A2;}
+.top-right{display:flex;align-items:center;gap:10px;}
+.avatar-btn{width:34px;height:34px;border-radius:50%;background:#A8D5A2;color:var(--green);font-weight:800;font-size:0.85rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.logout-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;padding:5px 12px;border-radius:20px;font-size:0.78rem;cursor:pointer;font-family:'Nunito',sans-serif;}
+.logout-btn:hover{background:rgba(255,255,255,0.28);}
+
+/* ── BOTTOM NAV ── */
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1.5px solid var(--border);display:flex;z-index:50;box-shadow:0 -4px 16px rgba(0,0,0,0.06);}
+.nav-item{flex:1;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;font-family:'Nunito',sans-serif;color:#888;transition:color .2s;}
+.nav-item.active{color:var(--green);}
+.nav-item .icon{font-size:1.4rem;}
+.nav-item .label{font-size:0.65rem;font-weight:700;}
+
+/* ── CONTENT ── */
+.content{padding:20px 16px 90px;max-width:520px;margin:0 auto;}
+
+/* ── CARD ── */
+.card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:16px;border:1px solid var(--border);box-shadow:var(--shadow);}
+
+/* ── FORMS ── */
+.form-group{margin-bottom:14px;}
+.form-label{font-size:0.82rem;font-weight:700;color:#444;display:block;margin-bottom:5px;}
+.form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:0.9rem;font-family:'Nunito',sans-serif;color:var(--text);background:#FAFCFA;outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--green);background:#fff;}
+select.form-input{cursor:pointer;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ── BUTTONS ── */
+.btn{width:100%;padding:13px;border-radius:12px;font-size:0.95rem;font-weight:700;font-family:'Nunito',sans-serif;border:none;cursor:pointer;transition:all .15s;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:var(--green-dark);}
+.btn-green:active{transform:scale(.98);}
+.btn-green:disabled{opacity:.6;cursor:not-allowed;}
+.btn-outline{background:#fff;color:var(--green);border:2px solid var(--green);margin-top:10px;}
+.btn-outline:hover{background:var(--bg);}
+.btn-sm{padding:7px 14px;border-radius:8px;font-size:0.78rem;font-weight:700;font-family:'Nunito',sans-serif;border:none;cursor:pointer;}
+.btn-sm.green{background:var(--green);color:#fff;}
+.btn-sm.red{background:#C4622D;color:#fff;}
+.btn-sm.outline{background:#fff;color:var(--green);border:1.5px solid var(--green);}
+.btn-sm.gray{background:#eee;color:#555;}
+
+/* ── LOGIN ── */
+#loginPage{background:linear-gradient(160deg,var(--green) 0%,var(--green-dark) 60%,var(--green) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.login-box{background:#fff;border-radius:24px;padding:32px 28px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.login-logo{text-align:center;margin-bottom:4px;font-size:2rem;font-weight:800;color:var(--green);}
+.login-logo span{color:var(--terra);}
+.login-tag{text-align:center;font-size:0.8rem;color:#888;margin-bottom:24px;}
+.login-tabs{display:flex;margin-bottom:20px;border-radius:10px;overflow:hidden;border:1.5px solid var(--border);}
+.login-tab{flex:1;padding:9px;text-align:center;font-weight:700;font-size:0.85rem;cursor:pointer;border:none;background:#FAFCFA;font-family:'Nunito',sans-serif;color:#888;transition:all .2s;}
+.login-tab.active{background:var(--green);color:#fff;}
+.login-form{display:none;}
+.login-form.active{display:block;}
+
+/* ── HOW IT WORKS ── */
+.how-hero{background:var(--green);color:#fff;padding:24px 16px;text-align:center;}
+.how-hero h2{font-size:1.4rem;font-weight:800;margin-bottom:4px;}
+.svu-box{background:#FFF8E1;border-radius:12px;border:1.5px solid #FFE082;padding:14px;margin-bottom:16px;}
+.svu-box h4{font-size:0.88rem;font-weight:800;color:var(--amber);margin-bottom:8px;}
+.svu-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #FFE082;font-size:0.84rem;}
+.svu-row:last-child{border-bottom:none;}
+.svu-pts{font-weight:800;color:var(--green);}
+.step-wrap{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid #eee;}
+.step-wrap:last-child{border-bottom:none;}
+.step-num{width:40px;height:40px;border-radius:50%;background:var(--green-light);color:var(--green);font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-wrap h4{font-size:.9rem;font-weight:700;margin-bottom:2px;}
+.step-wrap p{font-size:.8rem;color:var(--muted);line-height:1.5;}
+
+/* ── LIST GOODS ── */
+.svu-live{background:var(--green-light);border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;border:1.5px solid #A8D5A2;}
+.svu-live-val{font-size:1.6rem;font-weight:800;color:var(--green);}
+.listing-item{background:#fff;border-radius:12px;border:1px solid var(--border);padding:13px 15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.listing-left{display:flex;align-items:center;gap:10px;}
+.listing-emoji{font-size:1.5rem;}
+.listing-name{font-weight:700;font-size:.88rem;}
+.listing-sub{font-size:.74rem;color:var(--muted);}
+.listing-badge{background:var(--green-light);color:var(--green);padding:3px 10px;border-radius:20px;font-size:.74rem;font-weight:700;}
+
+/* ── BROWSE ── */
+.browse-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.browse-card{background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.browse-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1);}
+.browse-emoji{height:90px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:var(--green-light);}
+.browse-body{padding:10px 12px;}
+.browse-cat{font-size:.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--green);font-weight:700;margin-bottom:2px;}
+.browse-name{font-weight:700;font-size:.85rem;margin-bottom:2px;}
+.browse-qty{font-size:.75rem;color:var(--muted);}
+.browse-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+.browse-svu{background:var(--green-light);color:var(--green);padding:3px 8px;border-radius:20px;font-size:.7rem;font-weight:700;}
+.browse-owner{font-size:.7rem;color:var(--muted);}
+.cat-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+.cat-tab{background:#fff;border:1.5px solid var(--border);border-radius:20px;padding:5px 14px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;color:#666;font-family:'Nunito',sans-serif;}
+.cat-tab.active{background:var(--green);color:#fff;border-color:var(--green);}
+
+/* ── MATCH SECTION ── */
+.match-banner{background:var(--green);color:#fff;border-radius:14px;padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;}
+.match-banner h4{font-size:.9rem;font-weight:700;}
+.match-banner p{font-size:.75rem;opacity:.85;}
+
+/* ── TRADING ── */
+.trade-card{background:#fff;border-radius:14px;border:1.5px solid var(--border);padding:15px;margin-bottom:12px;position:relative;}
+.trade-card.new-req::before{content:'NEW';position:absolute;top:10px;right:10px;background:var(--terra);color:#fff;font-size:.6rem;font-weight:800;padding:2px 7px;border-radius:20px;}
+.trade-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.trade-av{width:38px;height:38px;border-radius:50%;font-weight:800;font-size:.85rem;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.trade-name{font-weight:700;font-size:.88rem;}
+.trade-loc{font-size:.74rem;color:var(--muted);}
+.trade-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+.pill{background:var(--bg);border-radius:20px;padding:4px 10px;font-size:.76rem;font-weight:600;border:1px solid var(--border);}
+.svu-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.svu-block{flex:1;border-radius:8px;padding:6px 10px;text-align:center;}
+.svu-block.g{background:var(--green-light);}
+.svu-block.r{background:var(--terra-light);}
+.svu-block .sv{font-weight:800;font-size:.95rem;color:var(--green);}
+.svu-block.r .sv{color:var(--terra);}
+.svu-block .sl{font-size:.65rem;color:var(--muted);}
+.svu-eq{font-weight:800;color:#aaa;font-size:1.1rem;}
+.fair-label{font-size:.76rem;margin-bottom:10px;font-weight:700;}
+.fair-label.fair{color:var(--green);}
+.fair-label.near{color:var(--amber);}
+.fair-label.imbal{color:var(--terra);}
+.trade-actions{display:flex;gap:8px;}
+.hist-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:13px 15px;margin-bottom:10px;}
+.hist-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.hist-name{font-weight:700;font-size:.85rem;}
+.status-badge{padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;}
+.status-badge.completed{background:#E8F4E8;color:var(--green);}
+.status-badge.in_transit{background:#E3F2FD;color:#1565C0;}
+.status-badge.pending,.status-badge.accepted{background:#FFF3E0;color:var(--amber);}
+.status-badge.declined{background:#FFEBEE;color:#C62828;}
+.status-badge.disputed{background:#FCE4EC;color:#880E4F;}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:40px 20px;color:#bbb;}
+.empty .eico{font-size:2.5rem;margin-bottom:8px;}
+.empty p{font-size:.84rem;}
+
+/* ── SECTION HEADER ── */
+.sec-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.sec-title{font-size:.95rem;font-weight:800;}
+.sec-count{font-size:.75rem;color:var(--muted);}
+
+/* ── LOADER ── */
+.loader{display:flex;align-items:center;justify-content:center;padding:30px;color:var(--muted);font-size:.85rem;gap:8px;}
+.spinner{width:18px;height:18px;border:2.5px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-80px);background:#1a2e1a;color:#fff;padding:10px 22px;border-radius:30px;font-size:.84rem;font-weight:700;z-index:999;transition:transform .3s;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.2);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.err{background:#B71C1C;}
+.toast.ok{background:var(--green);}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal-sheet{background:#fff;border-radius:24px 24px 0 0;padding:24px 20px 40px;width:100%;max-width:520px;animation:slideUp .28s ease;}
+.modal-title{font-size:1.05rem;font-weight:800;margin-bottom:14px;}
+.modal-close{float:right;border:none;background:none;font-size:1.2rem;cursor:pointer;color:#888;margin-top:-4px;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+/* ── DIVIDER ── */
+.divider{text-align:center;color:#ccc;font-size:.78rem;margin:10px 0;}
+.badge-new{display:inline-block;background:var(--terra);color:#fff;font-size:.65rem;font-weight:800;padding:1px 6px;border-radius:10px;margin-left:4px;vertical-align:middle;}
+</style>
+</head>
+<body>
+
+<!-- ═══════ LOGIN ═══════ -->
+<div class="page active" id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">Barter<span>Root</span></div>
+    <div class="login-tag">Exchange goods fairly, without money 🌾</div>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchLoginTab('login',this)">Login</button>
+      <button class="login-tab" onclick="switchLoginTab('register',this)">Register</button>
+    </div>
+    <div class="login-form active" id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="loginEmail" type="email" placeholder="your@email.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="loginPass" type="password" placeholder="••••••••"/>
+      </div>
+      <button class="btn btn-green" id="loginBtn" onclick="doLogin()">Login →</button>
+      <div class="divider">— or —</div>
+      <button class="btn btn-outline" onclick="demoLogin()">Continue as Demo User</button>
+    </div>
+    <div class="login-form" id="registerForm">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" id="regName" type="text" placeholder="e.g. Ravi Kumar"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="regEmail" type="email" placeholder="your@email.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location</label>
+        <input class="form-input" id="regLoc" type="text" placeholder="District, State"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password (min 6 chars)</label>
+        <input class="form-input" id="regPass" type="password" placeholder="Min 6 characters"/>
+      </div>
+      <button class="btn btn-green" id="regBtn" onclick="doRegister()">Create Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ MAIN APP ═══════ -->
+<div class="page" id="appPage">
+  <div class="topbar">
+    <div class="topbar-logo">Barter<span>Root</span></div>
+    <div class="top-right">
+      <span id="topName" style="font-size:.8rem;"></span>
+      <div class="avatar-btn" id="topAvatar">R</div>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div id="howSection" class="appSec" style="display:none;">
+    <div class="how-hero">
+      <h2>How BarterRoot Works</h2>
+      <p style="font-size:.84rem;opacity:.88;">Trade fairly using our value point system</p>
+    </div>
+    <div class="content">
+      <div class="svu-box">
+        <h4>⚖️ Standard Value Units (SVU) — Point Rates</h4>
+        <div class="svu-row"><span>🌾 Grains (Rice, Wheat, Dal)</span><span class="svu-pts">50 SVU / kg</span></div>
+        <div class="svu-row"><span>🍎 Fruits</span><span class="svu-pts">120 SVU / kg</span></div>
+        <div class="svu-row"><span>🥦 Vegetables</span><span class="svu-pts">40 SVU / kg</span></div>
+        <div class="svu-row"><span>🥛 Dairy</span><span class="svu-pts">80 SVU / kg</span></div>
+        <div class="svu-row"><span>💊 Pharmaceuticals</span><span class="svu-pts">800 SVU / unit</span></div>
+        <div class="svu-row"><span>📦 Other goods</span><span class="svu-pts">60 SVU / kg</span></div>
+      </div>
+      <div class="card">
+        <div class="step-wrap"><div class="step-num">1</div><div><h4>📝 List your goods</h4><p>Add what you want to give. SVU points are calculated automatically from category and quantity.</p></div></div>
+        <div class="step-wrap"><div class="step-num">2</div><div><h4>🔍 Get matched</h4><p>The platform finds users whose goods have equal SVU value to yours — fair exchange guaranteed.</p></div></div>
+        <div class="step-wrap"><div class="step-num">3</div><div><h4>🤝 Send trade request</h4><p>Review the SVU breakdown, accept or negotiate. Both must agree before exchange starts.</p></div></div>
+        <div class="step-wrap"><div class="step-num">4</div><div><h4>🚚 Exchange goods</h4><p>Meet locally, use delivery, or go via warehouse hub. Confirm receipt when goods arrive.</p></div></div>
+        <div class="step-wrap" style="border:none;"><div class="step-num">5</div><div><h4>⭐ Rate your partner</h4><p>After exchange, rate the trader. Builds trust for the whole community.</p></div></div>
+      </div>
+      <div class="card" style="background:#FFF8E1;border-color:#FFE082;">
+        <p style="font-size:.84rem;line-height:1.7;color:#5D4037;"><strong>Example:</strong> Ravi has 5 kg Rice = 250 SVU. Priya has 2 kg Apples = 240 SVU. Difference is only 10 SVU (4%) — within fair limit. They exchange. No money needed! ✅</p>
+      </div>
+      <button class="btn btn-green" onclick="showSec('listSection')">Start — List Your Goods →</button>
+    </div>
+  </div>
+
+  <!-- LIST GOODS -->
+  <div id="listSection" class="appSec" style="display:none;">
+    <div class="content">
+      <div class="sec-hdr"><div class="sec-title">📦 List a Good</div></div>
+      <div class="card">
+        <div class="form-group">
+          <label class="form-label">Product Name</label>
+          <input class="form-input" id="pName" type="text" placeholder="e.g. Basmati Rice"/>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-input" id="pCat" onchange="calcSVU()">
+              <option value="">-- Select --</option>
+              <option value="grain">🌾 Grains — 50 SVU/kg</option>
+              <option value="fruit">🍎 Fruits — 120 SVU/kg</option>
+              <option value="vegetable">🥦 Vegetables — 40 SVU/kg</option>
+              <option value="dairy">🥛 Dairy — 80 SVU/kg</option>
+              <option value="pharma">💊 Pharma — 800 SVU/unit</option>
+              <option value="other">📦 Other — 60 SVU/kg</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Unit</label>
+            <select class="form-input" id="pUnit">
+              <option>kg</option><option>litre</option>
+              <option>dozen</option><option>box</option><option>unit</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input class="form-input" id="pQty" type="number" min="0.1" step="0.1" placeholder="e.g. 10" oninput="calcSVU()"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input class="form-input" id="pLoc" type="text" placeholder="City / District"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exchange Method</label>
+          <select class="form-input" id="pMethod">
+            <option>Meet locally</option><option>Delivery service</option>
+            <option>Warehouse hub</option><option>Any method</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description (optional)</label>
+          <input class="form-input" id="pDesc" type="text" placeholder="Quality notes, grade, etc."/>
+        </div>
+        <div class="svu-live">
+          <div><div style="font-size:.76rem;color:var(--green);font-weight:700;">Your SVU Value</div><div style="font-size:.7rem;color:#4a8a4a;">Others will match with this</div></div>
+          <div class="svu-live-val" id="svuLive">0 SVU</div>
+        </div>
+        <button class="btn btn-green" id="addListingBtn" onclick="addListing()">Add to My Listings ✓</button>
+      </div>
+      <div class="sec-hdr"><div class="sec-title">My Listed Goods</div><div class="sec-count" id="myListCount">0 items</div></div>
+      <div id="myListings"><div class="empty"><div class="eico">📭</div><p>No goods listed yet.<br/>Add your first item above!</p></div></div>
+    </div>
+  </div>
+
+  <!-- BROWSE -->
+  <div id="browseSection" class="appSec" style="display:none;">
+    <div class="content">
+      <div class="match-banner">
+        <div><h4>🔍 Find Your Match</h4><p>See users matched to your SVU</p></div>
+        <button class="btn-sm green" onclick="loadMatches()">Find Matches</button>
+      </div>
+      <div id="matchResults"></div>
+      <div class="sec-hdr" style="margin-top:8px;"><div class="sec-title">All Listings</div></div>
+      <div class="cat-tabs" id="catTabs">
+        <button class="cat-tab active" onclick="filterCat('',this)">All</button>
+        <button class="cat-tab" onclick="filterCat('grain',this)">🌾 Grains</button>
+        <button class="cat-tab" onclick="filterCat('fruit',this)">🍎 Fruits</button>
+        <button class="cat-tab" onclick="filterCat('vegetable',this)">🥦 Veg</button>
+        <button class="cat-tab" onclick="filterCat('dairy',this)">🥛 Dairy</button>
+        <button class="cat-tab" onclick="filterCat('pharma',this)">💊 Pharma</button>
+      </div>
+      <div id="browseGrid" class="browse-grid"></div>
+    </div>
+  </div>
+
+  <!-- TRADING -->
+  <div id="tradeSection" class="appSec" style="display:none;">
+    <div class="content">
+      <div class="sec-hdr">
+        <div class="sec-title">🔔 Trade Requests <span class="badge-new" id="reqBadge" style="display:none;">0</span></div>
+        <button class="btn-sm outline" onclick="loadTrades()">Refresh</button>
+      </div>
+      <div id="incomingTrades"></div>
+      <div class="sec-hdr" style="margin-top:8px;"><div class="sec-title">📋 My Trade History</div></div>
+      <div id="tradeHistory"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottomnav">
+    <button class="nav-item active" id="nav-how" onclick="showSec('howSection')">
+      <div class="icon">💡</div><div class="label">How it works</div>
+    </button>
+    <button class="nav-item" id="nav-list" onclick="showSec('listSection')">
+      <div class="icon">📦</div><div class="label">List Goods</div>
+    </button>
+    <button class="nav-item" id="nav-browse" onclick="showSec('browseSection')">
+      <div class="icon">🔍</div><div class="label">Browse</div>
+    </button>
+    <button class="nav-item" id="nav-trade" onclick="showSec('tradeSection')">
+      <div class="icon">🤝</div><div class="label">Trading</div>
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title" id="modalTitle"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+const API = '/api';
+const SVU_RATES = { grain:50, fruit:120, vegetable:40, dairy:80, pharma:800, other:60 };
+const CAT_EMOJI = { grain:'🌾', fruit:'🍎', vegetable:'🥦', dairy:'🥛', pharma:'💊', other:'📦' };
+const COLORS = ['#2D6A2D','#C4622D','#1565C0','#6A1B9A','#00695C','#E65100'];
+
+let token = localStorage.getItem('br_token');
+let currentUser = JSON.parse(localStorage.getItem('br_user') || 'null');
+let allListings = [];
+let currentCat = '';
+
+// ═══════════════════════════════════════════════
+//  API HELPER
+// ═══════════════════════════════════════════════
+async function api(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body) opts.body = JSON.stringify(body);
+
+  const res = await fetch(API + path, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || 'Request failed');
+  return data;
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+window.addEventListener('load', () => {
+  if (token && currentUser) {
+    enterApp();
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════
+function switchLoginTab(tab, el) {
+  document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(tab === 'login' ? 'loginForm' : 'registerForm').classList.add('active');
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPass').value.trim();
+  if (!email || !pass) { toast('⚠ Please fill all fields', 'err'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = 'Logging in...';
+  try {
+    const data = await api('POST', '/auth/login', { email, password: pass });
+    saveSession(data.token, data.user);
+    enterApp();
+    toast('👋 Welcome back, ' + data.user.name + '!', 'ok');
+  } catch(e) {
+    toast('❌ ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Login →';
+  }
+}
+
+async function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const loc   = document.getElementById('regLoc').value.trim();
+  const pass  = document.getElementById('regPass').value.trim();
+  if (!name || !email || !pass) { toast('⚠ Fill all required fields', 'err'); return; }
+  if (pass.length < 6) { toast('⚠ Password min 6 characters', 'err'); return; }
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true; btn.textContent = 'Creating...';
+  try {
+    const data = await api('POST', '/auth/register', { name, email, password: pass, location: loc });
+    saveSession(data.token, data.user);
+    enterApp();
+    toast('✅ Account created! Welcome, ' + data.user.name, 'ok');
+  } catch(e) {
+    toast('❌ ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create Account →';
+  }
+}
+
+async function demoLogin() {
+  // Try demo account, create if not exists
+  try {
+    const data = await api('POST', '/auth/login', { email: 'demo@barterroot.com', password: 'demo123' });
+    saveSession(data.token, data.user);
+    enterApp();
+    toast('👋 Welcome, Demo User!', 'ok');
+  } catch {
+    try {
+      const data = await api('POST', '/auth/register', { name: 'Demo User', email: 'demo@barterroot.com', password: 'demo123', location: 'Chennai, TN' });
+      saveSession(data.token, data.user);
+      enterApp();
+      toast('👋 Demo account ready!', 'ok');
+    } catch(e) {
+      toast('❌ ' + e.message, 'err');
+    }
+  }
+}
+
+function saveSession(t, u) {
+  token = t;
+  currentUser = u;
+  localStorage.setItem('br_token', t);
+  localStorage.setItem('br_user', JSON.stringify(u));
+}
+
+function enterApp() {
+  document.getElementById('loginPage').classList.remove('active');
+  document.getElementById('appPage').classList.add('active');
+  document.getElementById('topName').textContent = currentUser.name;
+  document.getElementById('topAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+  showSec('howSection');
+}
+
+function logout() {
+  token = null; currentUser = null;
+  localStorage.removeItem('br_token');
+  localStorage.removeItem('br_user');
+  document.getElementById('appPage').classList.remove('active');
+  document.getElementById('loginPage').classList.add('active');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+// ═══════════════════════════════════════════════
+//  SECTION SWITCHING
+// ═══════════════════════════════════════════════
+function showSec(id) {
+  document.querySelectorAll('.appSec').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).style.display = 'block';
+  const map = { howSection:'nav-how', listSection:'nav-list', browseSection:'nav-browse', tradeSection:'nav-trade' };
+  if (map[id]) document.getElementById(map[id]).classList.add('active');
+  if (id === 'listSection')  loadMyListings();
+  if (id === 'browseSection') loadBrowse();
+  if (id === 'tradeSection')  loadTrades();
+}
+
+// ═══════════════════════════════════════════════
+//  SVU CALCULATOR
+// ═══════════════════════════════════════════════
+function calcSVU() {
+  const cat = document.getElementById('pCat').value;
+  const qty = parseFloat(document.getElementById('pQty').value) || 0;
+  const svu = cat && qty > 0 ? Math.round(SVU_RATES[cat] * qty) : 0;
+  document.getElementById('svuLive').textContent = svu > 0 ? svu.toLocaleString() + ' SVU' : '0 SVU';
+}
+
+// ═══════════════════════════════════════════════
+//  LISTINGS
+// ═══════════════════════════════════════════════
+async function addListing() {
+  const name   = document.getElementById('pName').value.trim();
+  const cat    = document.getElementById('pCat').value;
+  const qty    = document.getElementById('pQty').value;
+  const unit   = document.getElementById('pUnit').value;
+  const loc    = document.getElementById('pLoc').value.trim();
+  const method = document.getElementById('pMethod').value;
+  const desc   = document.getElementById('pDesc').value.trim();
+  if (!name || !cat || !qty || !loc) { toast('⚠ Fill all required fields', 'err'); return; }
+  const btn = document.getElementById('addListingBtn');
+  btn.disabled = true; btn.textContent = 'Adding...';
+  try {
+    await api('POST', '/listings', { name, category: cat, quantity: qty, unit, location: loc, exchangeMethod: method, description: desc });
+    toast('✅ ' + name + ' listed!', 'ok');
+    document.getElementById('pName').value = '';
+    document.getElementById('pCat').value = '';
+    document.getElementById('pQty').value = '';
+    document.getElementById('pLoc').value = '';
+    document.getElementById('pDesc').value = '';
+    document.getElementById('svuLive').textContent = '0 SVU';
+    loadMyListings();
+  } catch(e) {
+    toast('❌ ' + e.message, 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Add to My Listings ✓';
+  }
+}
+
+async function loadMyListings() {
+  const el = document.getElementById('myListings');
+  el.innerHTML = '<div class="loader"><div class="spinner"></div> Loading...</div>';
+  try {
+    const data = await api('GET', '/listings/mine');
+    document.getElementById('myListCount').textContent = data.listings.length + ' item' + (data.listings.length !== 1 ? 's' : '');
+    if (!data.listings.length) {
+      el.innerHTML = '<div class="empty"><div class="eico">📭</div><p>No goods listed yet.<br/>Add your first item above!</p></div>';
+      return;
+    }
+    el.innerHTML = data.listings.map(l => `
+      <div class="listing-item">
+        <div class="listing-left">
+          <div class="listing-emoji">${CAT_EMOJI[l.category] || '📦'}</div>
+          <div>
+            <div class="listing-name">${l.name}</div>
+            <div class="listing-sub">${l.quantity} ${l.unit} · ${l.location} · ${l.exchangeMethod}</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <span class="listing-badge">${l.svuValue.toLocaleString()} SVU</span>
+          <button class="btn-sm gray" onclick="deleteListing('${l._id}','${l.name}')">Remove</button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty"><p>❌ ' + e.message + '</p></div>';
+  }
+}
+
+async function deleteListing(id, name) {
+  if (!confirm('Remove "' + name + '" from your listings?')) return;
+  try {
+    await api('DELETE', '/listings/' + id);
+    toast('🗑 Removed', 'ok');
+    loadMyListings();
+  } catch(e) {
+    toast('❌ ' + e.message, 'err');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  BROWSE
+// ═══════════════════════════════════════════════
+async function loadBrowse(cat) {
+  const el = document.getElementById('browseGrid');
+  el.innerHTML = '<div class="loader"><div class="spinner"></div> Loading...</div>';
+  try {
+    const url = '/listings' + (cat ? '?category=' + cat : '');
+    const data = await api('GET', url);
+    allListings = data.listings;
+    renderBrowseGrid(data.listings);
+  } catch(e) {
+    el.innerHTML = '<div class="empty"><p>❌ ' + e.message + '</p></div>';
+  }
+}
+
+function filterCat(cat, el) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadBrowse(cat);
+}
+
+function renderBrowseGrid(listings) {
+  const el = document.getElementById('browseGrid');
+  if (!listings.length) {
+    el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="eico">🛒</div><p>No listings found.</p></div>';
+    return;
+  }
+  el.innerHTML = listings.map(l => {
+    const color = COLORS[Object.keys(CAT_EMOJI).indexOf(l.category) % COLORS.length];
+    return `
+    <div class="browse-card" onclick="openListing('${l._id}')">
+      <div class="browse-emoji" style="background:${color}18;">${CAT_EMOJI[l.category] || '📦'}</div>
+      <div class="browse-body">
+        <div class="browse-cat">${l.category.toUpperCase()}</div>
+        <div class="browse-name">${l.name}</div>
+        <div class="browse-qty">${l.quantity} ${l.unit} · ${l.location}</div>
+        <div class="browse-footer">
+          <span class="browse-svu">${l.svuValue.toLocaleString()} SVU</span>
+          <span class="browse-owner">${l.user?.name || 'User'}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openListing(id) {
+  const l = allListings.find(x => x._id === id);
+  if (!l) return;
+  const color = COLORS[Object.keys(CAT_EMOJI).indexOf(l.category) % COLORS.length];
+  openModal(CAT_EMOJI[l.category] + ' ' + l.name, `
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:var(--bg);border-radius:10px;padding:10px;">
+          <div style="font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:2px;">QUANTITY</div>
+          <div style="font-weight:800;">${l.quantity} ${l.unit}</div>
+        </div>
+        <div style="background:var(--green-light);border-radius:10px;padding:10px;">
+          <div style="font-size:.7rem;color:var(--green);font-weight:700;margin-bottom:2px;">SVU VALUE</div>
+          <div style="font-weight:800;color:var(--green);">${l.svuValue.toLocaleString()} SVU</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:10px;">
+          <div style="font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:2px;">OWNER</div>
+          <div style="font-weight:800;">${l.user?.name || '—'}</div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:10px;">
+          <div style="font-size:.7rem;color:var(--muted);font-weight:700;margin-bottom:2px;">LOCATION</div>
+          <div style="font-weight:800;">${l.location}</div>
+        </div>
+      </div>
+      ${l.description ? `<div style="background:var(--bg);border-radius:10px;padding:10px;font-size:.82rem;color:var(--muted);">${l.description}</div>` : ''}
+      <div style="background:var(--bg);border-radius:10px;padding:10px;font-size:.82rem;"><strong>Exchange method:</strong> ${l.exchangeMethod}</div>
+      ${l.user?._id !== currentUser?.id ?
+        `<button class="btn btn-green" onclick="closeModal();sendTradeRequest('${l.user?._id}','${l._id}')">Send Trade Request</button>` :
+        `<div style="text-align:center;font-size:.82rem;color:var(--muted);">This is your listing</div>`}
+    </div>
+  `);
+}
+
+// ═══════════════════════════════════════════════
+//  MATCHING
+// ═══════════════════════════════════════════════
+async function loadMatches() {
+  const el = document.getElementById('matchResults');
+  el.innerHTML = '<div class="loader"><div class="spinner"></div> Finding matches...</div>';
+  try {
+    const data = await api('GET', '/listings/match');
+    if (!data.matches.length) {
+      el.innerHTML = '<div class="empty" style="margin-bottom:16px;"><div class="eico">🔍</div><p>No matches found yet.<br/>Add more listings to get matched!</p></div>';
+      return;
+    }
+    el.innerHTML = '<div style="margin-bottom:14px;">' + data.matches.slice(0, 3).map(m => {
+      const pct = m.pct;
+      const labelClass = pct <= 5 ? 'fair' : pct <= 15 ? 'near' : 'imbal';
+      const labelText = pct <= 5 ? '✅ Fair trade' : pct <= 15 ? '⚠ Near match' : '❌ Imbalanced';
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      return `
+      <div class="trade-card">
+        <div class="trade-top">
+          <div class="trade-av" style="background:${color};">${m.user.name.charAt(0)}</div>
+          <div><div class="trade-name">${m.user.name}</div><div class="trade-loc">📍 ${m.user.location || 'Unknown'} · ⭐ ${m.user.rating}</div></div>
+        </div>
+        <div class="trade-pills">${m.listings.map(l => `<div class="pill">${CAT_EMOJI[l.category]} ${l.quantity}${l.unit} ${l.name}</div>`).join('')}</div>
+        <div class="svu-bar">
+          <div class="svu-block g"><div class="sv">${m.mySVU}</div><div class="sl">My SVU</div></div>
+          <div class="svu-eq">⇄</div>
+          <div class="svu-block r"><div class="sv">${m.theirSVU}</div><div class="sl">Their SVU</div></div>
+        </div>
+        <div class="fair-label ${labelClass}">${labelText} — gap: ${m.diff} SVU (${m.pct}%)</div>
+        <button class="btn-sm green" style="width:100%;" onclick="sendTradeRequest('${m.user._id}','${m.listings.map(l=>l._id).join(',')}')">Send Trade Request</button>
+      </div>`;
+    }).join('') + '</div>';
+  } catch(e) {
+    el.innerHTML = '<div class="empty" style="margin-bottom:16px;"><p>' + e.message + '</p></div>';
+  }
+}
+
+async function sendTradeRequest(receiverId, listingIds) {
+  openModal('📨 Send Trade Request', `
+    <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px;">Add a message to your trade request (optional)</p>
+    <div class="form-group">
+      <label class="form-label">Message</label>
+      <input class="form-input" id="tradeMsg" type="text" placeholder="e.g. I have fresh quality goods, let's trade!"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Exchange Method</label>
+      <select class="form-input" id="tradeMeth">
+        <option>Meet locally</option><option>Delivery service</option>
+        <option>Warehouse hub</option><option>Any method</option>
+      </select>
+    </div>
+    <button class="btn btn-green" onclick="confirmSendTrade('${receiverId}','${listingIds}')">Send Request ✓</button>
+  `);
+}
+
+async function confirmSendTrade(receiverId, listingIdsStr) {
+  const msg    = document.getElementById('tradeMsg').value.trim();
+  const method = document.getElementById('tradeMeth').value;
+  const ids    = listingIdsStr.split(',');
+  try {
+    await api('POST', '/trades', { receiverId, receiverListingIds: ids, message: msg, exchangeMethod: method });
+    closeModal();
+    toast('✅ Trade request sent!', 'ok');
+  } catch(e) {
+    toast('❌ ' + e.message, 'err');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  TRADES
+// ═══════════════════════════════════════════════
+async function loadTrades() {
+  const inEl  = document.getElementById('incomingTrades');
+  const histEl = document.getElementById('tradeHistory');
+  inEl.innerHTML  = '<div class="loader"><div class="spinner"></div></div>';
+  histEl.innerHTML = '<div class="loader"><div class="spinner"></div></div>';
+  try {
+    const data = await api('GET', '/trades');
+    const incoming = data.trades.filter(t => t.receiver?._id === currentUser?.id && t.status === 'pending');
+    const history  = data.trades.filter(t => t.status !== 'pending' || t.requester?._id === currentUser?.id);
+
+    // Badge
+    const badge = document.getElementById('reqBadge');
+    if (incoming.length > 0) { badge.style.display = 'inline-block'; badge.textContent = incoming.length; }
+    else { badge.style.display = 'none'; }
+
+    // Incoming
+    if (!incoming.length) {
+      inEl.innerHTML = '<div class="empty"><div class="eico">📬</div><p>No pending requests.</p></div>';
+    } else {
+      inEl.innerHTML = incoming.map(t => renderTradeCard(t, true)).join('');
+    }
+
+    // History
+    if (!history.length) {
+      histEl.innerHTML = '<div class="empty"><div class="eico">📋</div><p>No trade history yet.</p></div>';
+    } else {
+      histEl.innerHTML = history.map(t => renderHistCard(t)).join('');
+    }
+  } catch(e) {
+    inEl.innerHTML  = '<div class="empty"><p>❌ ' + e.message + '</p></div>';
+    histEl.innerHTML = '';
+  }
+}
+
+function renderTradeCard(t, isIncoming) {
+  const partner = isIncoming ? t.requester : t.receiver;
+  const color = COLORS[t._id.charCodeAt(0) % COLORS.length];
+  const pct = t.svuDifferencePercent || 0;
+  const labelClass = pct <= 5 ? 'fair' : pct <= 15 ? 'near' : 'imbal';
+  const labelText  = pct <= 5 ? '✅ Fair trade' : pct <= 15 ? '⚠ Near match' : '❌ Imbalanced';
+  const theirItems = isIncoming ? t.requesterListings : t.receiverListings;
+  return `
+  <div class="trade-card new-req">
+    <div class="trade-top">
+      <div class="trade-av" style="background:${color};">${(partner?.name || 'U').charAt(0)}</div>
+      <div><div class="trade-name">${partner?.name || 'Unknown'}</div><div class="trade-loc">📍 ${partner?.location || '—'} · ⭐ ${partner?.rating || 5}</div></div>
+    </div>
+    ${t.message ? `<div style="background:var(--green-light);border-radius:8px;padding:8px 10px;font-size:.8rem;margin-bottom:10px;color:var(--green-dark);">💬 "${t.message}"</div>` : ''}
+    <div style="font-size:.74rem;color:var(--muted);margin-bottom:6px;">They offer:</div>
+    <div class="trade-pills">${(theirItems||[]).map(l => `<div class="pill">${CAT_EMOJI[l.category]} ${l.quantity}${l.unit} ${l.name}</div>`).join('')}</div>
+    <div class="svu-bar">
+      <div class="svu-block r"><div class="sv">${t.requesterSVU}</div><div class="sl">Their SVU</div></div>
+      <div class="svu-eq">⇄</div>
+      <div class="svu-block g"><div class="sv">${t.receiverSVU}</div><div class="sl">Your SVU</div></div>
+    </div>
+    <div class="fair-label ${labelClass}">${labelText} — gap ${pct}%</div>
+    <div class="trade-actions">
+      <button class="btn-sm green" style="flex:1;" onclick="doTrade('${t._id}','accept')">✓ Accept</button>
+      <button class="btn-sm red"   style="flex:1;" onclick="doTrade('${t._id}','decline')">✕ Decline</button>
+    </div>
+  </div>`;
+}
+
+function renderHistCard(t) {
+  const isReq = t.requester?._id === currentUser?.id;
+  const partner = isReq ? t.receiver : t.requester;
+  const myItems  = isReq ? t.requesterListings : t.receiverListings;
+  const theirItems = isReq ? t.receiverListings : t.requesterListings;
+  const canConfirm = (t.status === 'accepted' || t.status === 'in_transit') &&
+    ((isReq && !t.requesterConfirmed) || (!isReq && !t.receiverConfirmed));
+  return `
+  <div class="hist-card">
+    <div class="hist-row">
+      <div class="hist-name">${partner?.name || 'Unknown'}</div>
+      <span class="status-badge ${t.status}">${t.status.replace('_',' ')}</span>
+    </div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">
+      You give: ${(myItems||[]).map(l=>l.name).join(', ')} &nbsp;↔&nbsp; You get: ${(theirItems||[]).map(l=>l.name).join(', ')}
+    </div>
+    <div style="font-size:.72rem;color:#bbb;margin-bottom:${canConfirm?'10px':'0'};">${new Date(t.createdAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
+    ${canConfirm ? `<button class="btn-sm green" style="width:100%;" onclick="doTrade('${t._id}','confirm')">✅ Confirm Receipt</button>` : ''}
+    ${t.status==='accepted'||t.status==='in_transit' ? `<button class="btn-sm gray" style="width:100%;margin-top:6px;" onclick="doTrade('${t._id}','dispute')">🚨 Raise Dispute</button>` : ''}
+  </div>`;
+}
+
+async function doTrade(tradeId, action) {
+  const labels = { accept:'Accepting...', decline:'Declining...', confirm:'Confirming...', dispute:'Raising...' };
+  try {
+    await api('PATCH', '/trades/' + tradeId + '/' + action);
+    const msgs = { accept:'Trade accepted! Coordinate your exchange.', decline:'Trade declined.', confirm:'Receipt confirmed!', dispute:'Dispute raised. Admin will review.' };
+    toast(msgs[action] || 'Done', 'ok');
+    loadTrades();
+  } catch(e) {
+    toast('❌ ' + e.message, 'err');
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════════
+function openModal(title, body) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+
+// ═══════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════
+let toastTimer;
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + (type || '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
